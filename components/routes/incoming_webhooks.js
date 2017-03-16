@@ -5,13 +5,14 @@ module.exports = function(webserver, controller) {
     debug('Configured /slack/receive url');
     webserver.post('/slack/receive', function(req, res) {
 
+      console.log('REQ MAKING IT IN', req);
         // NOTE: we should enforce the token check here
+        var bot = controller.spawn({});
 
         // respond to Slack that the webhook has been received.
         res.status(200);
-
         // Now, pass the webhook into be processed
-        controller.handleWebhookPayload(req, res);
+        controller.handleWebhookPayload(req, res, bot);
 
     });
 

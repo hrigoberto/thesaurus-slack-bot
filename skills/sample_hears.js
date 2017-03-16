@@ -27,23 +27,12 @@ module.exports = function(controller) {
         stats.convos++;
     });
 
+    controller.hears('optin', 'direct_message,direct_mention', function(bot, message) {
+      controller.trigger('onboard', [bot, message]);
+    })
 
-    controller.hears(['^uptime','^debug'], 'direct_message,direct_mention', function(bot, message) {
 
-        bot.createConversation(message, function(err, convo) {
-            if (!err) {
-                convo.setVar('uptime', formatUptime(process.uptime()));
-                convo.setVar('convos', stats.convos);
-                convo.setVar('triggers', stats.triggers);
-
-                convo.say('My main process has been online for {{vars.uptime}}. Since booting, I have heard {{vars.triggers}} triggers, and conducted {{vars.convos}} conversations.');
-                convo.activate();
-            }
-        });
-
-    });
-
-    controller.hears(['^say (.*)','^say'], 'direct_message,direct_mention', function(bot, message) {
+    controller.hears(['^say (.*)','^say'], 'message_received', function(bot, message) {
         if (message.match[1]) {
 
             if (!wordfilter.blacklisted(message.match[1])) {
@@ -56,30 +45,10 @@ module.exports = function(controller) {
         }
     });
 
+    controller.hears(['(.*)'], 'direct_message,direct_mention', function(bot, message) {
+      console.log('MADE IT HERE', message);
+      controller.trigger('thesaurus:input',  [bot, message]);
+    })
 
-    /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-    /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-    /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-    /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-    /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-    /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-    /* Utility function to format uptime */
-    function formatUptime(uptime) {
-        var unit = 'second';
-        if (uptime > 60) {
-            uptime = uptime / 60;
-            unit = 'minute';
-        }
-        if (uptime > 60) {
-            uptime = uptime / 60;
-            unit = 'hour';
-        }
-        if (uptime != 1) {
-            unit = unit + 's';
-        }
-
-        uptime = parseInt(uptime) + ' ' + unit;
-        return uptime;
-    }
 
 };
